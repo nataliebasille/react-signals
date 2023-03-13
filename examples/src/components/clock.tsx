@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
-import { computed, signal, SignalAccessor, SignalNode, useComputedSignal, useSignal } from "@nataliebasille/signals-react";
+import { SignalAccessor, SignalNode, useComputedSignal, useSignal } from "@nataliebasille/signals-react";
 import { useEffect } from "react";
+import { useAutoAnimate } from "@formkit/auto-animate/react";
 
 const timestamp = () => {
   const date = new Date();
@@ -11,37 +12,77 @@ const timestamp = () => {
   const milliseconds = date.getMilliseconds();
 
   return {
-    hours,
+    hours: hours % 12 || 12,
     minutes,
     seconds,
     milliseconds,
+    am: hours < 12,
   };
 };
 
-const [time, setTime] = signal(timestamp);
-const pad1Zero = (value: number) => (value < 10 ? `0${value}` : value);
-const timeFormatted = computed(() => {
-  const { hours, minutes, seconds } = time();
-  return `${pad1Zero(hours)}:${pad1Zero(minutes)}:${pad1Zero(seconds)}`;
-})
+const AnimatedNode = ({ value }: { value: SignalAccessor<number | string> }) => {
+  const [ref] = useAutoAnimate<HTMLSpanElement>({
+    easing: "ease-in",
+  });
+  const node = useComputedSignal(() => <span key={value()}>{value()}</span>);
 
-const DigitalClock = () => {
   return (
-    <div className="font-mono text-8xl">
-      <SignalNode signal={timeFormatted} />
+    <span ref={ref}>
+      <SignalNode signal={node} />
+    </span>
+  );
+};
+const DigitalClock = ({ time }: { time: SignalAccessor<ReturnType<typeof timestamp>> }) => {
+  console.log("DigitalClock - rendered");
+  const [ref] = useAutoAnimate<HTMLDivElement>();
+
+  const secondsOnes = useComputedSignal(() => {
+    const { seconds } = time();
+    return seconds % 10;
+  });
+  const secondsTens = useComputedSignal(() => {
+    const { seconds } = time();
+    return Math.floor(seconds / 10);
+  });
+  const minutesOnes = useComputedSignal(() => {
+    const { minutes } = time();
+    return minutes % 10;
+  });
+  const minutesTens = useComputedSignal(() => {
+    const { minutes } = time();
+    return Math.floor(minutes / 10);
+  });
+  const hours = useComputedSignal(() => {
+    const { hours } = time();
+    return hours;
+  });
+  const ampm = useComputedSignal(() => {
+    const { am } = time();
+    return am ? "A" : "P";
+  });
+  return (
+    <div className="flex font-mono text-8xl" ref={ref}>
+      <AnimatedNode value={hours} />
+      :
+      <AnimatedNode value={minutesTens} />
+      <AnimatedNode value={minutesOnes} />
+      :
+      <AnimatedNode value={secondsTens} />
+      <AnimatedNode value={secondsOnes} />
+      <span className="ml-4"><AnimatedNode value={ampm} />M</span>
     </div>
   );
 };
 
 export function Clock() {
+  const [time, setTime] = useSignal(timestamp);
+
   useEffect(() => {
     let cancelled = false;
     const tick = () => {
       setTime(timestamp());
-      if(!cancelled) {
-        setTimeout(() => {
-          requestAnimationFrame(tick);
-        }, 1000/60)
+      if (!cancelled) {
+        requestAnimationFrame(tick);
       }
     };
 
@@ -52,5 +93,9 @@ export function Clock() {
     };
   }, []);
 
-  return <DigitalClock />;
+  return (
+    <div className="flex h-screen w-screen items-center justify-center">
+      <DigitalClock time={time} />
+    </div>
+  );
 }
