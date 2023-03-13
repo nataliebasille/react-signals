@@ -5,15 +5,19 @@ export const getCurrentAction = () => {
   return currentAction;
 };
 
+let id = 0;
 export const runInContext = <T>(action: ContextAction<T>) => {
   let result: T = undefined as T;
-  currentAction = () => {
+  const contextualAction = () => {
     const previousAction = currentAction;
+    currentAction = contextualAction;
     result = action();
     currentAction = previousAction;
-  };
+  }
 
-  currentAction();
+  (contextualAction as any)._id = ++id
+
+  contextualAction();
 
   return result as T;
 };
