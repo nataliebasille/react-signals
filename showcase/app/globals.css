@@ -1,0 +1,15 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --primary: 25 9 51;
+    --primaryContrast: 255 255 255;
+    --secondary: 165 102 139;
+    --secondaryContrast: 255 255 255;
+    --tertiary: 236 207 195;
+    --tertiaryContrast: 0 0 0;
+    --accent: 101 142 156;
+  }
+}
