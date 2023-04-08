@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { SignalNode, useSignal } from "@nataliebasille/signals-react";
+import { SignalNode, useSignal } from "@natcore/signals-react";
 import Highlight from "react-highlight";
 import Head from "next/head";
 

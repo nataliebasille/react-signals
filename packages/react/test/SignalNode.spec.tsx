@@ -1,9 +1,9 @@
-import { signal, SignalModifier } from "@nataliebasille/signals-core"
-import { SignalNode, useSignal } from ".."
-import { render, screen } from '@testing-library/react';
+import { signal } from "@natcore/signals-core";
+import { SignalNode } from "..";
+import { render, screen } from "@testing-library/react";
 import { useEffect } from "react";
 
-describe('SignalNode', () => {
+describe("SignalNode", () => {
   it("signal change only rerenders node it's attached too", () => {
     const renderedChecker = jest.fn();
     const [value, setValue] = signal(0);
@@ -12,11 +12,11 @@ describe('SignalNode', () => {
       useEffect(() => {
         setValue(1);
       }, []);
-      return <SignalNode signal={value} />
-    }
+      return <SignalNode signal={value} />;
+    };
 
     render(<TestComponent />);
     expect(renderedChecker).toHaveBeenCalledTimes(1);
-    expect(screen.getByText('1')).toBeInTheDocument();
+    expect(screen.getByText("1")).toBeInTheDocument();
   });
-})
+});

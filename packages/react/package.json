@@ -1,8 +1,8 @@
 {
-  "name": "@nataliebasille/signals-react",
+  "name": "@natcore/signals-react",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
     "test": "jest"
   },
@@ -18,7 +18,7 @@
   },
   "homepage": "https://github.com/nataliebasille/natcore-signals#readme",
   "dependencies": {
-    "@nataliebasille/signals-core": "^1.0.0",
+    "@natcore/signals-core": "^1.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

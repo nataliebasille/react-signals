@@ -5,7 +5,9 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "postinstall": "(cd ./packages/core && npm install); (cd ./packages/react && npm link ../core && npm install); (cd ./examples && npm link ../packages/core && npm link ../packages/react && npm install)",
+    "showcase": "cd ./examples && npm run dev"
   },
   "repository": {
     "type": "git",

@@ -9,7 +9,7 @@
 /** @type {import("next").NextConfig} */
 const config = {
   reactStrictMode: true,
-  transpilePackages: ['@nataliebasille/signals-react', '@nataliebasille/signals-core'],
+  transpilePackages: ['@natcore/signals-react', '@natcore/signals-core'],
   /**
    * If you have the "experimental: { appDir: true }" setting enabled, then you
    * must comment the below `i18n` config out.

@@ -1,6 +1,6 @@
 "use client";
 
-import { SignalAccessor, SignalNode, useComputedSignal, useSignal } from "@nataliebasille/signals-react";
+import { SignalAccessor, SignalNode, useComputedSignal, useSignal } from "@natcore/signals-react";
 import { useEffect } from "react";
 import { useAutoAnimate } from "@formkit/auto-animate/react";
 
@@ -69,7 +69,9 @@ const DigitalClock = ({ time }: { time: SignalAccessor<ReturnType<typeof timesta
       :
       <AnimatedNode value={secondsTens} />
       <AnimatedNode value={secondsOnes} />
-      <span className="ml-4"><AnimatedNode value={ampm} />M</span>
+      <span className="ml-4">
+        <AnimatedNode value={ampm} />M
+      </span>
     </div>
   );
 };

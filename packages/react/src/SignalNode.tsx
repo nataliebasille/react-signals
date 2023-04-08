@@ -1,13 +1,13 @@
-import { SignalAccessor } from "@nataliebasille/signals-core";
+import { SignalAccessor } from "@natcore/signals-core";
 import { useState } from "react";
 import { useSignalEffect } from "./useSignalEffect";
 
-export const SignalNode = <T extends unknown>({ signal }: { signal: SignalAccessor<T>}) => {
+export const SignalNode = <T extends unknown>({ signal }: { signal: SignalAccessor<T> }) => {
   const [value, setValue] = useState<T>(() => signal());
 
   useSignalEffect(() => {
-    setValue(signal())
+    setValue(signal());
   });
 
   return <>{value}</>;
-}
+};
