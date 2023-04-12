@@ -1,5 +1,8 @@
-import { ContextAction } from './types';
+import { ContextAction, SignalAccessorSymbol } from "./types";
 
+type SignalAccessorForAction<TAction extends () => unknown> = TAction & {
+  [SignalAccessorSymbol]: "SignalAccessor";
+};
 let currentAction: ContextAction<void> | undefined = undefined;
 export const getCurrentAction = () => {
   return currentAction;
@@ -13,9 +16,9 @@ export const runInContext = <T>(action: ContextAction<T>) => {
     currentAction = contextualAction;
     result = action();
     currentAction = previousAction;
-  }
+  };
 
-  (contextualAction as any)._id = ++id
+  (contextualAction as any)._id = ++id;
 
   contextualAction();
 
@@ -30,7 +33,9 @@ const adHocFlush = (deps: readonly ContextAction[]) => {
 
 let flushStrategy = adHocFlush;
 
-export const trackParentActions = <TAction extends () => unknown>(action: TAction): [TAction, () => void] => {
+export const trackParentActions = <TAction extends () => unknown>(
+  action: TAction
+): [SignalAccessorForAction<TAction>, () => void] => {
   const trackedActions = new Set<ContextAction>();
 
   const actionWithTracking = (() => {
@@ -41,7 +46,8 @@ export const trackParentActions = <TAction extends () => unknown>(action: TActio
       trackedActions.add(depAction);
     }
     return result;
-  }) as TAction;
+  }) as SignalAccessorForAction<TAction>;
+  actionWithTracking[SignalAccessorSymbol] = "SignalAccessor";
 
   const flush = () => {
     const dependentActionsToRun = [...trackedActions.values()];
