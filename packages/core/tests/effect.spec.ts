@@ -1,13 +1,13 @@
-import { computed, effect, signal } from '..';
+import { computed, effect, signal } from "..";
 
-describe('effect', () => {
-  it('runs when initalized', () => {
+describe("effect", () => {
+  it("runs when initalized", () => {
     const callback = jest.fn();
     effect(callback);
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
-  it('reruns when dependent signal changes', () => {
+  it("reruns when dependent signal changes", () => {
     const [value, setValue] = signal(0);
     const callback = jest.fn();
     const dispose = effect(() => {
@@ -20,7 +20,7 @@ describe('effect', () => {
     dispose();
   });
 
-  it('reruns when a dependent computed signal changes', () => {
+  it("reruns when a dependent computed signal changes", () => {
     const [value, setValue] = signal(0);
     const computedValue = computed(() => value() + 1);
     const callback = jest.fn();
@@ -34,7 +34,7 @@ describe('effect', () => {
     dispose();
   });
 
-  it('no longer runs once dispose is called', () => {
+  it("no longer runs once dispose is called", () => {
     const [value, setValue] = signal(0);
     const callback = jest.fn();
     const dispose = effect(() => {
@@ -47,7 +47,7 @@ describe('effect', () => {
     expect(callback).toHaveBeenCalledTimes(1);
   });
 
-  it('calls cleanup before it reruns', () => {
+  it("calls cleanup before it reruns", () => {
     const callback = jest.fn();
     const cleanup = jest.fn();
     const [value, setValue] = signal(0);
@@ -66,7 +66,7 @@ describe('effect', () => {
     dispose();
   });
 
-  it('cleanup is called on dispose', () => {
+  it("cleanup is called on dispose", () => {
     const callback = jest.fn();
     const cleanup = jest.fn();
     const dispose = effect(() => {
@@ -80,7 +80,7 @@ describe('effect', () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
-  it('updates are batched', () => {
+  it("updates are batched", () => {
     const [value, setValue] = signal(0);
     const callback = jest.fn();
     const dispose = effect(() => {
@@ -97,5 +97,23 @@ describe('effect', () => {
     expect(callback).toHaveBeenCalledTimes(2);
     dispose();
     dispose2();
+  });
+
+  it("cleanup is called in inner effect when outer effect dependency changes", () => {
+    const [value, setValue] = signal(0);
+    const cleanup = jest.fn();
+    const dispose = effect(() => {
+      value();
+      effect(() => {
+        return () => {
+          cleanup();
+        };
+      });
+    });
+
+    setValue(1);
+    expect(cleanup).toHaveBeenCalledTimes(1);
+    dispose();
+    expect(cleanup).toHaveBeenCalledTimes(2);
   });
 });

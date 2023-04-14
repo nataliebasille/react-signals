@@ -10,7 +10,11 @@ export type SignalSourceUnsubscriber = () => void;
 export type SignalSource<T> = {
   subscribe(subscriber: SignalSourceSubscriber<T>): SignalSourceUnsubscriber;
 };
-export type ContextAction<T = unknown> = () => T;
+export type ContextAction<T = unknown> = {
+  (): T;
+  childActions: ContextAction[];
+  cleanup?: () => void;
+};
 
 export function isSignalAccessor(value: unknown): value is SignalAccessor<unknown>;
 export function isSignalAccessor<T>(fn: () => T): fn is SignalAccessor<T>;

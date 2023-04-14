@@ -1,5 +1,6 @@
-import { runInContext, trackParentActions } from './action';
-import { SignalAccessor } from './types';
+import { trackParentActions } from "./action";
+import { runActionInContext } from "./context";
+import { SignalAccessor } from "./types";
 
 export const computed = <T>(action: () => T): SignalAccessor<T> => {
   let currentValue: T;
@@ -8,7 +9,7 @@ export const computed = <T>(action: () => T): SignalAccessor<T> => {
     return currentValue;
   });
 
-  runInContext(() => {
+  runActionInContext(() => {
     currentValue = action();
     flush();
   });

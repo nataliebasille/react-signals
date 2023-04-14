@@ -1,21 +1,16 @@
-import { batch, runInContext } from './action';
+import { batch } from "./action";
+import { runActionInContext } from "./context";
+import { ContextAction } from "./types";
 
 export type EffectCleanup = () => void;
 export type EffectDisposer = () => void;
 export type EffectAction = () => void | EffectCleanup;
 export const effect = (action: EffectAction): EffectDisposer => {
-  let actionToRun: EffectAction | undefined = action;
-  let cleanup: EffectCleanup | undefined = undefined;
-
-  runInContext(() => {
+  return runActionInContext((myContext) => {
     batch(() => {
-      cleanup?.();
-      cleanup = actionToRun?.() || undefined;
+      const cleanup = action();
+
+      if (cleanup) myContext.registerCleanup(cleanup);
     });
   });
-
-  return () => {
-    cleanup?.();
-    actionToRun = undefined;
-  };
 };
