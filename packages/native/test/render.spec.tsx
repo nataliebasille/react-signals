@@ -166,4 +166,40 @@ describe("render", () => {
     render(<Test />, document.body);
     expect(document.body.innerHTML).toBe("<h1></h1>");
   });
+
+  it("can render more than one signal has a child node", () => {
+    const [value, setValue] = signal("Hello");
+    const [value2, setValue2] = signal("World");
+    render(
+      <h1>
+        {value}
+        {value2}
+      </h1>,
+      document.body
+    );
+    expect(document.body.innerHTML).toBe("<h1>HelloWorld</h1>");
+    setValue("World");
+    expect(document.body.innerHTML).toBe("<h1>WorldWorld</h1>");
+    setValue2("Hello");
+    expect(document.body.innerHTML).toBe("<h1>WorldHello</h1>");
+  });
+
+  it("can render multiple fragments", () => {
+    render(
+      <>
+        <>
+          <h1>Test</h1>
+          <h2>Test</h2>
+        </>
+        <>
+          <h1>Test 2</h1>
+          <h2>Test 2</h2>
+          <h3>Test 2</h3>
+        </>
+      </>,
+      document.body
+    );
+
+    expect(document.body.innerHTML).toBe("<h1>Test</h1><h2>Test</h2><h1>Test 2</h1><h2>Test 2</h2><h3>Test 2</h3>");
+  });
 });

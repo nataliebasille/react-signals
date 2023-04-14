@@ -1,4 +1,4 @@
-import { SignalAccessorSymbol, computed, effect, isSignalAccessor } from "@natcore/signals-core";
+import { SignalAccessorSymbol, computed, effect, isSignalAccessor, signal, untrack } from "@natcore/signals-core";
 import {
   ComponentInstruction,
   FragmentInstruction,
@@ -17,40 +17,50 @@ export const render = (jsx: JSX.Element, root: Node) => {
   };
 };
 
-export const renderNode = (jsx: JSX.Element, parent: Node) => {
-  isInstruction(jsx)
+export const renderNode = (jsx: JSX.Element, parent: Node, anchor?: Node): Node | undefined => {
+  return isInstruction(jsx)
     ? jsx.type === "component"
-      ? renderComponentNode(jsx, parent)
+      ? renderComponentNode(jsx, parent, anchor)
       : jsx.type === "native"
-      ? renderNativeNode(jsx, parent)
+      ? renderNativeNode(jsx, parent, anchor)
       : jsx.type === "signal"
-      ? renderSignalNode(jsx, parent)
-      : renderFragmentNode(jsx, parent)
-    : renderPrimativeNode(jsx, parent);
+      ? renderSignalNode(jsx, parent, anchor)
+      : renderFragmentNode(jsx, parent, anchor)
+    : renderPrimativeNode(jsx, parent, anchor);
 };
 
-function renderPrimativeNode(jsx: Exclude<JSX.Element, RenderInstruction>, parent: Node) {
+function renderPrimativeNode(
+  jsx: Exclude<JSX.Element, RenderInstruction>,
+  parent: Node,
+  anchor?: Node
+): Node | undefined {
   if (typeof jsx === "function" && isSignalAccessor(jsx)) {
-    renderSignalNode(
+    return renderSignalNode(
       {
         type: "signal",
         accessor: jsx,
         [InstructionSymbol]: "SignalInstruction",
       },
-      parent
+      parent,
+      anchor
     );
-    return;
   }
   const node = document.createTextNode(jsx?.toString() ?? "");
-  parent.appendChild(node);
+  appendChild(parent, node, anchor);
+
+  return node;
 }
 
-function renderComponentNode({ component, props }: ComponentInstruction, parent: Node) {
+function renderComponentNode(
+  { component, props }: ComponentInstruction,
+  parent: Node,
+  anchor?: Node
+): Node | undefined {
   const result = component(props);
-  renderNode(result, parent);
+  return renderNode(result, parent, anchor);
 }
 
-function renderNativeNode({ tag, props, children }: NativeInstruction, parent: Node) {
+function renderNativeNode({ tag, props, children }: NativeInstruction, parent: Node, anchor?: Node): Node | undefined {
   const node = document.createElement(tag);
 
   Object.entries(props).forEach(([key, value]) => {
@@ -65,31 +75,36 @@ function renderNativeNode({ tag, props, children }: NativeInstruction, parent: N
     }
   });
 
-  children.forEach((child) => {
-    renderNode(child, node);
-  });
+  renderFragmentNode({ type: "fragment", children, [InstructionSymbol]: "FragmentInstruction" }, node, anchor);
 
-  parent.appendChild(node);
+  appendChild(parent, node, anchor);
+  return node;
 }
 
-function renderSignalNode({ accessor }: SignalInstruction, parent: Node) {
+function renderSignalNode({ accessor }: SignalInstruction, parent: Node, anchor?: Node): Node | undefined {
+  let [node, setNode] = signal(anchor);
   effect(() => {
-    removeChildNodes(parent);
-
     const value = accessor();
-
-    if (isInstruction(value)) {
-      renderNode(value, parent);
-    } else {
-      renderPrimativeNode(value, parent);
-    }
+    const currentNode = untrack(node);
+    setNode(
+      isInstruction(value) ? renderNode(value, parent, currentNode) : renderPrimativeNode(value, parent, currentNode)
+    );
   });
+
+  effect(() => {
+    const currentNode = node();
+    return () => {
+      currentNode?.parentElement?.removeChild(currentNode);
+    };
+  });
+
+  return node();
 }
 
-function renderFragmentNode({ children }: FragmentInstruction, parent: Node) {
-  children.forEach((child) => {
-    renderNode(child, parent);
-  });
+function renderFragmentNode({ children }: FragmentInstruction, parent: Node, anchor?: Node) {
+  return children.reduce((prev, child) => {
+    return renderNode(child, parent, prev);
+  }, anchor);
 }
 
 function removeChildNodes(node: Node) {
@@ -105,5 +120,13 @@ function setupProperty(node: object, key: string, value: any) {
     });
   } else {
     (node as any)[key] = value;
+  }
+}
+
+function appendChild(parent: Node, child: Node, anchor?: Node) {
+  if (anchor?.nextSibling) {
+    parent.insertBefore(child, anchor.nextSibling);
+  } else {
+    parent.appendChild(child);
   }
 }

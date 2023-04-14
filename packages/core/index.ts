@@ -1,4 +1,4 @@
-export { batch } from "./src/action";
+export { batch, untrack } from "./src/action";
 export * from "./src/computed";
 export * from "./src/effect";
 export * from "./src/signal";

@@ -73,3 +73,11 @@ export const batch = <T>(action: () => T) => {
 
   flushStrategy = previosuFlushStrategy;
 };
+
+export const untrack = <T>(action: () => T): T => {
+  const tempCurrentAction = currentAction;
+  currentAction = undefined;
+  const value = action();
+  currentAction = tempCurrentAction;
+  return value;
+};
