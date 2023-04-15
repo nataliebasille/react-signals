@@ -1,7 +1,7 @@
-import { computed, signal } from '..';
+import { computed, signal } from "..";
 
-describe('createComputed', () => {
-  it('computed is updated when dependent signal is updated', () => {
+describe("computed", () => {
+  it("computed is updated when dependent signal is updated", () => {
     const [value, setValue] = signal(1);
     const doubled = computed(() => value() * 2);
     expect(doubled()).toBe(2);
@@ -9,7 +9,7 @@ describe('createComputed', () => {
     expect(doubled()).toBe(4);
   });
 
-  it('computed is updated when a dependent computed changes', () => {
+  it("computed is updated when a dependent computed changes", () => {
     const [value, setValue] = signal(1);
     const doubled = computed(() => value() * 2);
     const plus3 = computed(() => doubled() + 3);
