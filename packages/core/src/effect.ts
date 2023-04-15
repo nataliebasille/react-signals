@@ -1,4 +1,4 @@
-import { batch } from "./action";
+import { batch } from "./tracking";
 import { runActionInContext } from "./context";
 import { ContextAction } from "./types";
 

@@ -49,16 +49,18 @@ describe("createSignal", () => {
     const [value, setValue] = signal(1);
     const callback = jest.fn();
     const computedValue = computed(() => {
-      value() * 2;
       callback();
+      return value() * 2;
     });
     const computedValue2 = computed(() => {
-      value() * 3;
       callback();
+      return value() * 3;
     });
+    expect(computedValue()).toBe(2);
+    expect(computedValue2()).toBe(3);
     setValue(2);
-    expect(callback).toHaveBeenCalledTimes(4);
     expect(computedValue()).toBe(4);
     expect(computedValue2()).toBe(6);
+    expect(callback).toHaveBeenCalledTimes(4);
   });
 });
