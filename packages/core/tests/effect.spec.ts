@@ -99,6 +99,37 @@ describe("effect", () => {
     dispose2();
   });
 
+  it("rerun effect each time dependent signal changes", () => {
+    const [value, setValue] = signal(0);
+    const callback = jest.fn();
+    const dispose = effect(() => {
+      value();
+      callback();
+    });
+
+    setValue(1);
+    setValue(2);
+    setValue(3);
+    expect(callback).toHaveBeenCalledTimes(4);
+    dispose();
+  });
+
+  it("reruns effect each time dependent computed changes", () => {
+    const [value, setValue] = signal(0);
+    const computedValue = computed(() => value() + 1);
+    const callback = jest.fn();
+    const dispose = effect(() => {
+      computedValue();
+      callback();
+    });
+
+    setValue(1);
+    setValue(2);
+    setValue(3);
+    expect(callback).toHaveBeenCalledTimes(4);
+    dispose();
+  });
+
   it("cleanup is called in inner effect when outer effect dependency changes", () => {
     const [value, setValue] = signal(0);
     const cleanup = jest.fn();

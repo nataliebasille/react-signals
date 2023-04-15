@@ -1,18 +1,31 @@
-import { trackParentActions } from "./action";
+import { startTracking, trackParentActions } from "./action";
 import { runActionInContext } from "./context";
-import { SignalAccessor } from "./types";
+import { SignalAccessor, SignalAccessorSymbol } from "./types";
 
 export const computed = <T>(action: () => T): SignalAccessor<T> => {
+  let recompute = true;
   let currentValue: T;
+  const accessor = (() => {
+    const flush = startTracking((track) => {
+      runActionInContext((context) => {
+        if (recompute) {
+          currentValue = action();
+        }
+        if (context.parentAction?.trackable) {
+          track(context.parentAction);
+        }
+        recompute = false;
+        context.registerCleanup(() => {
+          recompute = true;
+          flush();
+        });
+      });
+    });
 
-  const [computedSignalAccessor, flush] = trackParentActions(() => {
     return currentValue;
-  });
+  }) as SignalAccessor<T>;
 
-  runActionInContext(() => {
-    currentValue = action();
-    flush();
-  });
+  accessor[SignalAccessorSymbol] = "SignalAccessor";
 
-  return computedSignalAccessor;
+  return accessor;
 };

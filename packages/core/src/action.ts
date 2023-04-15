@@ -36,6 +36,20 @@ export const trackParentActions = <TAction extends () => unknown>(
   return [actionWithTracking, flush];
 };
 
+export const startTracking = (action: (track: (actionToTrack: ActionContext) => void) => void) => {
+  const trackedActions = new Set<ActionContext>();
+
+  action((actionToTrack) => {
+    trackedActions.add(actionToTrack);
+  });
+
+  return () => {
+    const dependentActionsToRun = [...trackedActions.values()];
+    trackedActions.clear();
+    flushStrategy(dependentActionsToRun);
+  };
+};
+
 export const batch = <T>(action: () => T) => {
   const previosuFlushStrategy = flushStrategy;
   const dependentActionsToRun = new Set<ActionContext>();
