@@ -1,17 +1,18 @@
 import { computed, effect, signal } from "@natcore/signals-core";
+import { JSXElement } from "@natcore/signals-native";
 
 /** @jsxImportSource @natcore/signals-native */
-export const counter = () => {
+export const counter = (): JSXElement => {
   const [count, setCount] = signal(0);
   const [playing, setPlaying] = signal(true);
 
   effect(() => {
     if (!playing()) return;
 
-    const id = setInterval(() => {
-      setCount(count() + 1);
-    }, 1000);
-    return () => clearInterval(id);
+    // const id = setInterval(() => {
+    //   setCount(count() + 1);
+    // }, 1000);
+    // return () => clearInterval(id);
   });
 
   return (
@@ -19,7 +20,7 @@ export const counter = () => {
       {computed(() => {
         return playing() ? "Pause" : "Play";
       })}
-      : {count}
+      :
     </button>
   );
 };

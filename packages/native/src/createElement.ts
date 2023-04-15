@@ -1,9 +1,10 @@
 import { ComponentInstruction, InstructionSymbol, NativeInstruction, SignalInstruction } from "./instructions";
 import { SignalAccessor, SignalAccessorSymbol } from "@natcore/signals-core";
+import { JSXElement } from "./render";
 
-type PossibleChildren = { children?: JSX.Element | JSX.Element[] };
+type PossibleChildren = { children?: JSXElement | JSXElement[] };
 export function createElement<TProps extends {}>(
-  component: (props: TProps) => JSX.Element,
+  component: (props: TProps) => JSXElement,
   props: TProps & PossibleChildren
 ): ComponentInstruction;
 export function createElement<T>(signal: SignalAccessor<T>): SignalInstruction;
@@ -16,11 +17,11 @@ export function createElement(
 
 export function createElement(
   /** undefined represents a fragment */
-  tagOrComponent: undefined | string | ((props: unknown) => JSX.Element) | SignalAccessor<JSX.Element>,
+  tagOrComponent: undefined | string | ((props: unknown) => JSXElement) | SignalAccessor<JSXElement>,
   props?: {
     [key: string]: any;
   } & PossibleChildren
-): JSX.Element {
+): JSXElement {
   props = props ?? {};
   const children =
     props?.children instanceof Array ? props.children : "children" in props && props.children ? [props.children] : [];

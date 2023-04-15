@@ -1,4 +1,4 @@
-import { SignalAccessorSymbol, computed, effect, isSignalAccessor, signal, untrack } from "@natcore/signals-core";
+import { effect, isSignalAccessor, signal, untrack, zone } from "@natcore/signals-core";
 import {
   ComponentInstruction,
   FragmentInstruction,
@@ -9,15 +9,18 @@ import {
   isInstruction,
 } from "./instructions";
 
-export const render = (jsx: JSX.Element, root: Node) => {
-  renderNode(jsx, root);
+export type JSXElement = RenderInstruction | string | boolean | number | null | undefined | (() => JSXElement);
+
+export const render = (jsx: () => JSXElement, root: Node) => {
+  const dispose = zone(() => renderNode(jsx(), root));
 
   return () => {
     removeChildNodes(root);
+    dispose();
   };
 };
 
-export const renderNode = (jsx: JSX.Element, parent: Node, anchor?: Node): Node | undefined => {
+export const renderNode = (jsx: JSXElement, parent: Node, anchor?: Node): Node | undefined => {
   return isInstruction(jsx)
     ? jsx.type === "component"
       ? renderComponentNode(jsx, parent, anchor)
@@ -30,7 +33,7 @@ export const renderNode = (jsx: JSX.Element, parent: Node, anchor?: Node): Node 
 };
 
 function renderPrimativeNode(
-  jsx: Exclude<JSX.Element, RenderInstruction>,
+  jsx: Exclude<JSXElement, RenderInstruction>,
   parent: Node,
   anchor?: Node
 ): Node | undefined {

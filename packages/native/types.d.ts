@@ -1,8 +1,9 @@
 import { SignalAccessor } from "@natcore/signals-core";
-import type { RenderInstruction } from "src/instructions";
+import { JSXElement } from "src/render";
+
 declare global {
   namespace JSX {
-    type Element = RenderInstruction | string | boolean | number | null | undefined | (() => Element);
+    type Element = JSXElement;
     type IntrinsicElements = Record<string, any>;
   }
 }

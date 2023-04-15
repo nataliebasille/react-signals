@@ -1,15 +1,16 @@
 import type { SignalAccessor } from "@natcore/signals-core";
+import { JSXElement } from "./render";
 
 export const InstructionSymbol = Symbol("Instruction");
 export type FragmentInstruction = {
   type: "fragment";
-  children: JSX.Element[];
+  children: JSXElement[];
   [InstructionSymbol]: "FragmentInstruction";
 };
 
 export type ComponentInstruction = {
   type: "component";
-  component: (props: unknown) => JSX.Element;
+  component: (props: unknown) => JSXElement;
   props: unknown;
   [InstructionSymbol]: "ComponentInstruction";
 };
@@ -18,13 +19,13 @@ export type NativeInstruction = {
   type: "native";
   tag: string;
   props: Record<string, any>;
-  children: JSX.Element[];
+  children: JSXElement[];
   [InstructionSymbol]: "NativeInstruction";
 };
 
 export type SignalInstruction = {
   type: "signal";
-  accessor: SignalAccessor<JSX.Element>;
+  accessor: SignalAccessor<JSXElement>;
   [InstructionSymbol]: "SignalInstruction";
 };
 
