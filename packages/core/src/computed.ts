@@ -3,23 +3,24 @@ import { runActionInContext } from "./context";
 import { SignalAccessor, SignalAccessorSymbol } from "./types";
 
 export const computed = <T>(action: () => T): SignalAccessor<T> => {
-  let recompute = true;
   let currentValue: T;
   const flush = createTracker();
+  let accessorDispose = () => {};
+  runActionInContext(() => {
+    currentValue = action();
+    accessorDispose();
+  }, "computed evaluator");
+
   const accessor = (() => {
-    runActionInContext((context) => {
-      if (recompute) {
-        currentValue = action();
-      }
+    accessorDispose = runActionInContext((context) => {
       if (context.parentAction?.trackable) {
         flush.track(context.parentAction);
       }
-      recompute = false;
+
       context.registerCleanup(() => {
-        recompute = true;
         flush();
       });
-    });
+    }, "computed accessor");
 
     return currentValue;
   }) as SignalAccessor<T>;

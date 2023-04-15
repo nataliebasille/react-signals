@@ -7,7 +7,7 @@ type SignalAccessorForAction<TAction extends () => unknown> = TAction & {
 
 const adHocFlush = (deps: readonly ActionContext[]) => {
   for (const action of deps) {
-    action();
+    action(undefined);
   }
 };
 
@@ -42,8 +42,8 @@ export const batch = <T>(action: () => T) => {
 
   action();
 
-  dependentActionsToRun.forEach((action) => {
-    action();
+  dependentActionsToRun.forEach((actionContext) => {
+    actionContext(undefined);
   });
 
   flushStrategy = previosuFlushStrategy;

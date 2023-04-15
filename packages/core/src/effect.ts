@@ -12,5 +12,5 @@ export const effect = (action: EffectAction): EffectDisposer => {
 
       if (cleanup) myContext.registerCleanup(cleanup);
     });
-  });
+  }, "effect");
 };

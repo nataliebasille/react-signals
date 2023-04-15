@@ -1,4 +1,4 @@
-import { computed, effect, signal } from "..";
+import { computed, effect, signal, untrack } from "..";
 
 describe("effect", () => {
   it("runs when initalized", () => {
@@ -146,5 +146,28 @@ describe("effect", () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
     dispose();
     expect(cleanup).toHaveBeenCalledTimes(2);
+  });
+
+  it("special case - computed doesn't cause effect dependency changes", () => {
+    const [testSignal, setTestSignal] = signal("signal");
+    const accessor = computed(() => testSignal() + " accessor");
+    const callback = jest.fn();
+    let [node, setNode] = signal("initial");
+    effect(() => {
+      const value = accessor();
+      const currentNode = untrack(node);
+      setNode(value + currentNode);
+    });
+
+    effect(() => {
+      node();
+      callback();
+    });
+
+    expect(callback).toHaveBeenCalledTimes(1);
+    setTestSignal("2");
+    expect(callback).toHaveBeenCalledTimes(2);
+    setTestSignal("3");
+    expect(callback).toHaveBeenCalledTimes(3);
   });
 });

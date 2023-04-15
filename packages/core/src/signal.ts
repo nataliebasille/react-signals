@@ -12,13 +12,11 @@ export const signal = <T>(initialValue: T | (() => T)): Signal<T> => {
       initialized = true;
     }
 
-    const dispose = runActionInContext((context) => {
+    runActionInContext((context) => {
       if (context.parentAction?.trackable) {
         flush.track(context.parentAction);
       }
-    });
-
-    dispose();
+    }, "signal accessor");
 
     return currentValue;
   }) as SignalAccessor<T>;

@@ -1,5 +1,5 @@
 export type ActionContext<T = unknown> = {
-  (): T;
+  (owner?: ActionContext<unknown>): T;
   readonly childActions: readonly ActionContext[];
   readonly parentAction: ActionContext | undefined;
   readonly registerCleanup: (cleanup: () => void) => void;
@@ -11,8 +11,8 @@ export type ActionContext<T = unknown> = {
 type Mutable<T> = { -readonly [P in keyof T]: T[P] };
 
 let uuid = 0;
-const contextStack: ActionContext[] = [];
-export function runActionInContext<T>(action: (context: ActionContext) => T): () => void {
+let currentActionContext: ActionContext<unknown> | undefined = undefined;
+export function runActionInContext<T>(action: (context: ActionContext) => T, type: string): () => void {
   let ownCleanup: (() => void) | undefined = undefined;
   let disposed = false;
   const disposeChildActions = () => {
@@ -28,19 +28,20 @@ export function runActionInContext<T>(action: (context: ActionContext) => T): ()
     disposeChildActions();
   };
 
-  const context = (() => {
+  const context = function (owner?: ActionContext<unknown>) {
     if (disposed) return;
     cleanup();
-    const parent = getCurrentAction();
-    if (parent) {
-      (context as Mutable<ActionContext<T>>).parentAction = parent;
-      (parent.childActions as Array<any>).push(context);
+    const parentAction = arguments.length > 0 ? owner : getCurrentAction();
+    if (parentAction) {
+      (context as Mutable<ActionContext<T>>).parentAction = parentAction;
+      (parentAction.childActions as Array<any>).push(context);
     }
-    contextStack.push(context);
+    const previousAction = currentActionContext;
+    currentActionContext = context;
     const result = action(context);
-    contextStack.pop();
+    currentActionContext = previousAction;
     return result;
-  }) as ActionContext<T>;
+  } as ActionContext<T>;
 
   const dispose = () => {
     if (disposed) return;
@@ -50,6 +51,7 @@ export function runActionInContext<T>(action: (context: ActionContext) => T): ()
   };
 
   (context as any)._id = ++uuid;
+  (context as any)._type = type;
   (context as Mutable<ActionContext<T>>).trackable = true;
   (context as Mutable<ActionContext<T>>).childActions = [];
   (context as Mutable<ActionContext<T>>).dispose = dispose;
@@ -64,5 +66,5 @@ export function runActionInContext<T>(action: (context: ActionContext) => T): ()
 }
 
 export const getCurrentAction = () => {
-  return contextStack[contextStack.length - 1];
+  return currentActionContext;
 };
