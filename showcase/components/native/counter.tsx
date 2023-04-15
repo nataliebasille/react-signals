@@ -9,10 +9,10 @@ export const counter = (): JSXElement => {
   effect(() => {
     if (!playing()) return;
 
-    // const id = setInterval(() => {
-    //   setCount(count() + 1);
-    // }, 1000);
-    // return () => clearInterval(id);
+    const id = setInterval(() => {
+      setCount(count() + 1);
+    }, 1000);
+    return () => clearInterval(id);
   });
 
   return (
@@ -25,7 +25,7 @@ export const counter = (): JSXElement => {
       {computed(() => {
         return playing() ? "Pause" : "Play";
       })}
-      :
+      : {count}
     </button>
   );
 };
