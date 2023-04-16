@@ -173,7 +173,7 @@ describe("render", () => {
     expect(document.body.innerHTML).toBe("<h1></h1>");
   });
 
-  it("can render more than one signal has a child node", () => {
+  it("can render more than one signal as a child node", () => {
     const [value, setValue] = signal("Hello");
     const [value2, setValue2] = signal("World");
     render(
@@ -257,5 +257,33 @@ describe("render", () => {
     setShow(false);
 
     expect(document.body.innerHTML).toBe("<div><h3>Always here</h3></div>");
+  });
+
+  it("can render signal next to static text node", () => {
+    const [value, setValue] = signal("Hello");
+    render(() => <h1>placeholder : {value}</h1>, document.body);
+    expect(document.body.innerHTML).toBe("<h1>placeholder : Hello</h1>");
+    setValue("World");
+    expect(document.body.innerHTML).toBe("<h1>placeholder : World</h1>");
+    setValue("Hello");
+    expect(document.body.innerHTML).toBe("<h1>placeholder : Hello</h1>");
+  });
+
+  it("can render static text node in between signals", () => {
+    const [left, setLeft] = signal("Hello");
+    const [right, setRight] = signal("World");
+    render(
+      () => (
+        <h1>
+          {left} : {right}
+        </h1>
+      ),
+      document.body
+    );
+    expect(document.body.innerHTML).toBe("<h1>Hello : World</h1>");
+    setLeft("World");
+    expect(document.body.innerHTML).toBe("<h1>World : World</h1>");
+    setRight("Hello");
+    expect(document.body.innerHTML).toBe("<h1>World : Hello</h1>");
   });
 });

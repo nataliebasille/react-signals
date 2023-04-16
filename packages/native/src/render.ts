@@ -88,6 +88,7 @@ function renderSignalNode({ accessor }: SignalInstruction, parent: Node, anchor?
   let [endingNode, setEndingNode] = signal(anchor);
   effect(() => {
     const value = accessor();
+    const anchor = untrack(endingNode);
     setEndingNode(
       isInstruction(value) ? renderNode(value, parent, anchor) : renderPrimativeNode(value, parent, anchor)
     );
