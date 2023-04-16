@@ -16,16 +16,30 @@ export const counter = (): JSXElement => {
   });
 
   return (
-    <button
-      className="btn btn-primary"
-      onClick={() => {
-        setPlaying(!playing());
-      }}
-    >
+    <>
+      <button
+        className="btn btn-primary"
+        onClick={() => {
+          setPlaying(!playing());
+        }}
+      >
+        {computed(() => {
+          return playing() ? "Pause" : "Play";
+        })}
+        : {count}
+      </button>
       {computed(() => {
-        return playing() ? "Pause" : "Play";
+        return !playing() ? (
+          <>
+            <button className="btn btn-secondary" onClick={() => setCount(count() + 1)}>
+              Increment
+            </button>
+            <button className="btn btn-secondary" onClick={() => setCount(count() - 1)}>
+              Decrement
+            </button>
+          </>
+        ) : null;
       })}
-      : {count}
-    </button>
+    </>
   );
 };

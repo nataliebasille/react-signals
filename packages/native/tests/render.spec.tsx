@@ -212,4 +212,50 @@ describe("render", () => {
 
     expect(document.body.innerHTML).toBe("<h1>Test</h1><h2>Test</h2><h1>Test 2</h1><h2>Test 2</h2><h3>Test 2</h3>");
   });
+
+  it("DOM for fragment is completely removed", () => {
+    const [show, setShow] = signal(true);
+    const Frag = computed(() => {
+      return show() ? (
+        <>
+          <h1>Hello</h1>
+          <h2>World</h2>
+        </>
+      ) : null;
+    });
+
+    render(() => <Frag />, document.body);
+    expect(document.body.innerHTML).toBe("<h1>Hello</h1><h2>World</h2>");
+
+    setShow(false);
+
+    expect(document.body.innerHTML).toBe("");
+  });
+
+  it("DOM for nested fragment is completely removed", () => {
+    const [show, setShow] = signal(true);
+    const frag = computed(() => {
+      return show() ? (
+        <>
+          <h1>Hello</h1>
+          <h2>World</h2>
+        </>
+      ) : null;
+    });
+
+    render(
+      () => (
+        <div>
+          <h3>Always here</h3>
+          {frag}
+        </div>
+      ),
+      document.body
+    );
+    expect(document.body.innerHTML).toBe("<div><h3>Always here</h3><h1>Hello</h1><h2>World</h2></div>");
+
+    setShow(false);
+
+    expect(document.body.innerHTML).toBe("<div><h3>Always here</h3></div>");
+  });
 });

@@ -85,23 +85,27 @@ function renderNativeNode({ tag, props, children }: NativeInstruction, parent: N
 }
 
 function renderSignalNode({ accessor }: SignalInstruction, parent: Node, anchor?: Node): Node | undefined {
-  let [node, setNode] = signal(anchor);
+  let [endingNode, setEndingNode] = signal(anchor);
   effect(() => {
     const value = accessor();
-    const currentNode = untrack(node);
-    setNode(
-      isInstruction(value) ? renderNode(value, parent, currentNode) : renderPrimativeNode(value, parent, currentNode)
+    setEndingNode(
+      isInstruction(value) ? renderNode(value, parent, anchor) : renderPrimativeNode(value, parent, anchor)
     );
   });
 
   effect(() => {
-    const currentNode = node();
+    const last = endingNode();
     return () => {
-      currentNode?.parentElement?.removeChild(currentNode);
+      let toRemove = last;
+      while (parent.firstChild && toRemove && anchor !== toRemove) {
+        const nextToRemove = toRemove?.previousSibling;
+        parent.removeChild(toRemove);
+        toRemove = nextToRemove ?? undefined;
+      }
     };
   });
 
-  return node();
+  return endingNode();
 }
 
 function renderFragmentNode({ children }: FragmentInstruction, parent: Node, anchor?: Node) {
