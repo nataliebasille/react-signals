@@ -20,7 +20,7 @@
   "homepage": "https://github.com/nataliebasille/natcore-signals#readme",
   "workspaces": [
     "packages/*",
-    "examples/*"
+    "showcase"
   ],
   "devDependencies": {
     "@testing-library/jest-dom": "^5.16.5",
