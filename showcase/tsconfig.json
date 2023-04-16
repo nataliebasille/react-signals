@@ -22,7 +22,8 @@
     "paths": {
       "@/*": ["./*"],
       "@natcore/signals-core": ["../packages/core"],
-      "@natcore/signals-native": ["../packages/native"]
+      "@natcore/signals-native": ["../packages/native"],
+      "@natcore/signals-native/jsx-runtime": ["../packages/native/jsx-runtime"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
