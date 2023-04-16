@@ -6,7 +6,6 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "postinstall": "(cd ./packages/core && npm install); (cd ./packages/react && npm link ../core && npm install); (cd ./examples && npm link ../packages/core && npm link ../packages/react && npm install)",
     "showcase": "cd ./showcase && npm run dev"
   },
   "repository": {
